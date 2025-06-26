@@ -23,7 +23,7 @@
                     <table class="min-w-full table-auto border-collapse border border-gray-300">
                         <thead>
                             <tr class="bg-gray-100">
-                                <th class="border px-4 py-2">#</th>
+                                <th class="border px-4 py-2">No</th>
                                 @if(Auth::user()->role === 'admin')
                                 <th class="border px-4 py-2">Nama</th>
                                 @endif
@@ -54,8 +54,36 @@
                                     1 }} hari
                                 </td>
                                 <td class="border px-4 py-2">{{ $item->alasan ?? '-' }}</td>
-                                <td class="border px-4 py-2 capitalize">
-                                    {{ $item->status }}
+                                <td class="border px-4 py-2 text-center">
+                                    @if(Auth::user()->role === 'admin')
+                                    @if($item->status === 'pending')
+                                    <div class="flex justify-center gap-2">
+                                        <form action="{{ route('pengajuan-cuti.update', $item->id) }}" method="POST"
+                                            onsubmit="return confirm('Yakin ingin menyetujui cuti ini?')">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="status" value="disetujui">
+                                            <button type="submit" title="Setujui"
+                                                class="text-green-600 hover:text-green-800 text-xl">✔️</button>
+                                        </form>
+
+                                        <form action="{{ route('pengajuan-cuti.update', $item->id) }}" method="POST"
+                                            onsubmit="return confirm('Yakin ingin menolak cuti ini?')">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="status" value="ditolak">
+                                            <button type="submit" title="Tolak"
+                                                class="text-red-600 hover:text-red-800 text-xl">❌</button>
+                                        </form>
+                                    </div>
+                                    @else
+                                    <span
+                                        class="{{ $item->status === 'disetujui' ? 'text-green-700' : 'text-red-700' }}">{{
+                                        ucfirst($item->status) }}</span>
+                                    @endif
+                                    @else
+                                    <span>{{ ucfirst($item->status) }}</span>
+                                    @endif
                                 </td>
                                 @if(Auth::user()->role === 'admin')
                                 <td class="border px-4 py-2">

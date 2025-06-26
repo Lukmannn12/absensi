@@ -81,47 +81,47 @@ class PengajuanCutiController extends Controller
      */
     public function edit(string $id)
     {
-        // Hanya admin yang boleh mengakses
-    if (Auth::user()->role !== 'admin') {
-        abort(403, 'Akses ditolak');
-    }
+        //     // Hanya admin yang boleh mengakses
+        // if (Auth::user()->role !== 'admin') {
+        //     abort(403, 'Akses ditolak');
+        // }
 
-    $cuti = PengajuanCuti::findOrFail($id);
-    return view('admin.pengajuan_cuti.update', compact('cuti'));
+        // $cuti = PengajuanCuti::findOrFail($id);
+        // return view('admin.pengajuan_cuti.update', compact('cuti'));
     }
 
     /**
      * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+     */ 
+    
+     public function update(Request $request, string $id)
     {
         if (Auth::user()->role !== 'admin') {
-        abort(403, 'Akses ditolak');
-    }
-
-    $request->validate([
-        'status' => 'required|in:pending,disetujui,ditolak',
-    ]);
-
-    $cuti = PengajuanCuti::findOrFail($id);
-
-    // Hanya kurangi sisa cuti jika disetujui dan status sebelumnya belum disetujui
-    if ($cuti->status !== 'disetujui' && $request->status === 'disetujui') {
-        $durasi = Carbon::parse($cuti->tanggal_mulai)->diffInDays($cuti->tanggal_selesai) + 1;
-
-        $jatah = JatahCuti::where('user_id', $cuti->user_id)->first();
-        if ($jatah && $jatah->sisa_cuti >= $durasi) {
-            $jatah->decrement('sisa_cuti', $durasi);
-        } else {
-            return back()->with('error', 'Sisa cuti tidak mencukupi untuk menyetujui.');
+            abort(403, 'Akses ditolak');
         }
-    }
 
-    $cuti->update([
-        'status' => $request->status,
-    ]);
+        $request->validate([
+            'status' => 'required|in:pending,disetujui,ditolak',
+        ]);
 
-    return redirect()->route('pengajuan-cuti.index')->with('success', 'Status pengajuan cuti berhasil diperbarui.');
+        $cuti = PengajuanCuti::findOrFail($id);
+
+        if ($cuti->status !== 'disetujui' && $request->status === 'disetujui') {
+            $durasi = Carbon::parse($cuti->tanggal_mulai)->diffInDays($cuti->tanggal_selesai) + 1;
+
+            $jatah = JatahCuti::where('user_id', $cuti->user_id)->first();
+            if ($jatah && $jatah->sisa_cuti >= $durasi) {
+                $jatah->decrement('sisa_cuti', $durasi);
+            } else {
+                return back()->with('error', 'Sisa cuti tidak mencukupi untuk menyetujui.');
+            }
+        }
+
+        $cuti->update([
+            'status' => $request->status,
+        ]);
+
+        return redirect()->route('pengajuan-cuti.index')->with('success', 'Status pengajuan cuti berhasil diperbarui.');
     }
 
     /**
