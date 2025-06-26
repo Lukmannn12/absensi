@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JatahCutiController;
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\PengajuanCutiController;
@@ -11,13 +12,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboardadmin', function () {
-    return view('admin.dashboard');
-})->middleware(['auth', 'verified'])->name('dashboardadmin');
 
-Route::get('/dashboardkaryawan', function () {
-    return view('karyawann.dashboard');
-})->middleware(['auth', 'verified'])->name('dashboardkaryawan');
+Route::get('/dashboardadmin', [DashboardController::class, 'adminDashboard'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboardadmin');
+
+Route::get('/dashboardkaryawan', [DashboardController::class, 'karyawanDashboard'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboardkaryawan');
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('karyawan', KaryawanController::class);
