@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Absensi;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,7 +14,7 @@ class AbsensiController extends Controller
      */
     public function index()
     {
-         // Cek role user
+        // Cek role user
         if (Auth::user()->role === 'admin') {
             // Ambil semua data absensi
             $data = Absensi::with('user')
@@ -49,6 +50,17 @@ class AbsensiController extends Controller
     {
         $userId = Auth::id();
         $today = now()->toDateString();
+        $currentTime = now();
+
+        // Waktu mulai dan akhir absensi
+        $startTime = Carbon::createFromTime(8, 30);
+        $endTime = Carbon::createFromTime(17, 30);
+
+        // Cek apakah waktu sekarang berada di antara 08.30 - 17.30
+        if (!$currentTime->between($startTime, $endTime)) {
+            return redirect()->route('absensi.index')
+                ->with('success', 'Absensi hanya bisa dilakukan antara pukul 08:30 hingga 17:30.');
+        }
 
         $absensi = Absensi::where('user_id', $userId)
             ->where('tanggal', $today)
@@ -74,7 +86,6 @@ class AbsensiController extends Controller
 
         return redirect()->route('absensi.index')->with('success', 'Anda sudah absen masuk dan pulang hari ini.');
     }
-
 
     /**
      * Display the specified resource.
